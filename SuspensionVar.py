@@ -78,9 +78,8 @@ class SuspensionVar(object):
         based on the relationship.  This value is saved to the dictionary
         and the dictionary is returned
         """
-        print "Solving %s = %s given %s" % (self._name, 
-            self._relationship if self._relationship else input_vars[self._name], 
-            input_vars)
+        print "Solving %s = %s" % (self._name, 
+            self._relationship if self._relationship else input_vars[self._name])
 
         # check if we have anything to solve
         if not self._relationship:

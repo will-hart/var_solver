@@ -9,7 +9,10 @@ class SuspensionVarManager(object):
     other variable.  
 
     It then traverses the graph and solves the variables, finally printing 
-    the result for the user
+    the result for the user.
+    
+    Code: William Hart (11082131@brookes.ac.uk)
+    License: MIT
     """
 
     _vars = []  # SuspensionVar objects to be solved
@@ -26,8 +29,8 @@ class SuspensionVarManager(object):
 
     def resolve(self, plot=True):
         """Resolves the variables based on the given inputs and prints the result"""
-        solve_order = self._build_dependency_graph(plot)
-        self._traverse_solve(solve_order, self._resolve_inputs(solve_order))
+        self._build_dependency_graph(plot)
+        self._traverse_solve(self._resolve_inputs())
         return self._print_outputs()
     
     def load_json(self, json_str):
@@ -73,35 +76,31 @@ class SuspensionVarManager(object):
         self._graph = igraph.Graph(directed=True)
         
         # add vertices from vars and build edge list
+        # do a quick check to make sure we only add 
+        # each edge once.
         depend_edges = []
         for v in self._vars:
             self._graph.add_vertex(v.get_name(), obj=v)
-            depend_edges += v.get_dependency_list()
+            for dep in v.get_dependency_list():
+                if dep not in depend_edges:
+                    depend_edges.append(dep)
 
         # add edges
         self._graph.add_edges(depend_edges)
         
         # write out the whole dependency graph
         if plot:
-            layout = self._graph.layout("kk")
+            layout = self._graph.layout("fr")
             self._graph.vs['label'] = self._graph.vs['name']
-            igraph.plot(self._graph, "dependency_graph.pdf", layout=layout)
-        
-        # build the spanning tree for solving and write to file
-        tree = self._graph.spanning_tree()
-        if plot:
-            layout = tree.layout("kk")
-            tree.vs['label'] = tree.vs['name']
-            igraph.plot(tree, "solve_tree_graph.pdf", layout=layout)
+            igraph.plot(self._graph, "dependencies_0.pdf", layout=layout)
         
         # return the solving tree to the caller
         print " >> Dependency graph complete"
-        return tree
 
-    def _resolve_inputs(self, tree):
+    def _resolve_inputs(self):
         """Determines variables with no dependencies and gets their starting value"""
         print "Finding missing inputs"
-        no_pre = [x for x in tree.vs if x.predecessors() == []]
+        no_pre = [x for x in self._graph.vs if x.predecessors() == []]
 
         # copy all pre-defined inputs across to results
         self._results = self._inputs.copy()
@@ -109,11 +108,13 @@ class SuspensionVarManager(object):
         # work out if any input variables are missing
         for v in no_pre:
             if v['name'] not in self._results:
-                self._results[v['name']] = raw_input("Please enter a value for %s: " % v['name'])
+                input_val = raw_input("Please enter a value for %s: " % v['name'])
+                input_val = float(input_val) if '.' in input_val else int(input_val)                
+                self._results[v['name']] = input_val
         print " >> missing inputs complete"
         return no_pre
 
-    def _traverse_solve(self, tree, initial_roots):
+    def _traverse_solve(self, initial_roots):
         """Traverses the dependency graph, solving as it goes"""
         print "\n\n\n============================="
         print "       Starting solve"
@@ -126,25 +127,31 @@ class SuspensionVarManager(object):
         print "      INITIAL GIVENS:"
         print ', '.join([x['name'] for x in no_pre])
         print "-----------------------------\n\n"
-        
+        plot_counter = 0
         
         # process until we have leftover variables
         while len(no_pre) > 0:
             # solve each block with no predecessors
-            print "Assessing %s variables with no predecessors" % len(no_pre)
+            print "\nAssessing %s variables with no predecessors" % len(no_pre)
+            print "--------------------------------------------"
             for v in no_pre[:]:
-                print " > Consider %s " % v['name']
                 self._results = v['obj'].solve(self._results)
 
             # remove nodes that have been processed
-            tree.delete_vertices(no_pre)
+            self._graph.delete_vertices(no_pre)
+            
+            # write new dependency graph if required
+            if len(self._graph.vs) > 0:
+                plot_counter += 1
+                layout = self._graph.layout("fr")
+                self._graph.vs['label'] = self._graph.vs['name']
+                igraph.plot(self._graph, "dependencies_%s.pdf" % plot_counter, layout=layout)
 
             # get new nodes for processing
-            print "Determining new variables without predecessors"
-            no_pre = [x for x in tree.vs if x.predecessors() == []]
+            no_pre = [x for x in self._graph.vs if x.predecessors() == []]
         
         # if we have no nodes left, unset "incomplete" flag
-        if len(tree.vs) == 0:
+        if len(self._graph.vs) == 0:
             self._incomplete = False
         print " >> Solve complete"
         

@@ -1,3 +1,10 @@
+"""
+A solver for complex, inter-related variables.  Builds a graph
+of the variable inputs and solves them in an intelligent order.
+
+Code: William Hart (hart.wl@gmail.com)
+License: MIT
+"""
 import argparse
 from SuspensionVarManager import SuspensionVarManager
 
@@ -18,6 +25,7 @@ parser.add_argument('--version', action='version', version='%(prog)s 0.1')
 args = parser.parse_args()
 
 # get the json from the file
+print "Loading JSON data from %s" % args.datafile
 raw_json = ""
 with open(args.datafile) as f:
     raw_json = f.read()
