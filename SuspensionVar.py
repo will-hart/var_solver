@@ -1,3 +1,5 @@
+from sympy import S, Symbol
+
 class SuspensionVar(object):
     """
     A basic class for representing relationships between variables
@@ -7,70 +9,40 @@ class SuspensionVar(object):
     The dependent and independent variables are determined as 
     well as a the dependency graph.
 
-    To be correctly solved, the equation must be passed in the form
+    The Python library "sympy" (in particular sympify) is used to parse 
+    the variables which means that a wide range of expressions are possible.
+    For instance a valid expression would be:
 
-        ( VAR + D ) / WS + ( QX - Z * D )
+        (A_Var + Another_Var)/(2 * A_Third_Var^2)
 
-    Note there is a space between each  variable name and operator.
-    Allowable operators are +, -, /, *, ( and ). Direct integers and
-    floats (e.g 2x) are not allowed - use a variable constant instead 
-    and define at run time.  
-
-    Variables may have any name, but simple strings are recommended.
+    Note that Python uses `**` for powers, not the more common `^`.  As Sympy 
+    automatically converts these operators, use of either is permitted.
 
     Code: William Hart (11082131@brookes.ac.uk)
     License: MIT
     """
 
-    _name = ""
-    _derived = False
-    _relationship = ""
-    _built_relationship = ""
-    _depends_on = []
-    _operators = ["+", "-", "*", "/", "(", ")"]
+    _name = ""                      # the name of this symbol
+    _relationship = ""              # the raw relationship
+    _depends_on = []                # symbol names this depends on
+    _expression = None              # Sympy expression
 
     def __init__(self, name, reln=None):
         """Sets the name and optionally relationship for this variable"""
         self._name = name
-        self._derived = False
-        self._relationship = ""
-        self._built_relationship = ""
+        self._relationship = reln
         self._depends_on = []
+        self._expression = None
         if reln: 
-            self.derive(reln)
+            self._derive(reln)
 
-    def derive(self, reln):
+    def _derive(self, reln):
         """
         Used by the client to define the relationship that describes
         this variable
         """
-        self._derived = True
-        self._relationship = reln
-        
-        ops  = [x.strip() for x in self._relationship.split(" ")]
-        self._determine_dependency(ops)
-        
-        # Build the relationship using dictionary operators
-        self._built_relationship = ""
-        for i, v in enumerate(ops):
-            if ops[i] not in self._operators:
-                # if not an operator wrap in "inputs" dictionary
-                ops[i] = "inputs['%s']" % ops[i]
-        
-        # rejoin the list into an equation to solve
-        self._built_relationship = " ".join(ops)
-
-    def _determine_dependency(self, d_vars):
-        """
-        Determines the variables that this variable depends on
-        
-        Takes a list of equation terms (by splitting relationship
-        by "  ") as the d_vars argument
-        """
-        # remove operators and save
-        for i, v in enumerate(d_vars):
-            if d_vars[i] not in self._operators:
-                self._depends_on.append(d_vars[i])
+        self._expression = S(reln)
+        self._depends_on = [str(x) for x in self._expression.atoms(Symbol)]
 
     def solve(self, input_vars):
         """
@@ -94,7 +66,7 @@ class SuspensionVar(object):
                 inputs[k] = input_vars[k]
 
         # perform the calculation
-        op = eval(self._built_relationship)
+        op = self._expression.subs(inputs)
         print "     = %s" % op
         
         # update the dictionary and return
