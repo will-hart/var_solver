@@ -1,6 +1,8 @@
-from SuspensionVar import SuspensionVar
 import igraph
 import json
+from sympy import S
+
+from SuspensionVar import SuspensionVar
 
 class SuspensionVarManager(object):
     """
@@ -64,7 +66,7 @@ class SuspensionVarManager(object):
             start_conds = obj['start_conditions']
             for var in start_conds:
                 print "             Loading %s (value %s)" % (var, start_conds[var])
-                self._inputs[var] = start_conds[var]
+                self._inputs[var] = S(start_conds[var])
         print " >> Start condition load complete"
         print " >> JSON load complete"
 
@@ -108,9 +110,8 @@ class SuspensionVarManager(object):
         # work out if any input variables are missing
         for v in no_pre:
             if v['name'] not in self._results:
-                input_val = raw_input("Please enter a value for %s: " % v['name'])
-                input_val = float(input_val) if '.' in input_val else int(input_val)                
-                self._results[v['name']] = input_val
+                self._results[v['name']] = S(raw_input("Please enter a value for %s: " % v['name']))               
+
         print " >> missing inputs complete"
         return no_pre
 
@@ -174,12 +175,12 @@ class SuspensionVarManager(object):
         ret += "    INPUTS: \n\n"
         
         for k in self._inputs:
-            ret += "           > %s:    %s\n"  %(k, self._inputs[k])
+            ret += "           >\t%s: %0.4f\n"  %(k, self._inputs[k])
         
         ret += "----------------------------------------------------------\n\n"
         ret += "    RESULTS: \n\n"
         for k in self._results:
-            ret += "           > %s:    %s\n"  %(k, self._results[k])
+            ret += "           >\t%s: %0.4f\n"  %(k, self._results[k])
         
         ret += "----------------------------------------------------------\n"
 
