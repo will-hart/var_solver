@@ -1,0 +1,41 @@
+{
+    "variables": [
+        {"name": "F_Weight"},
+        {"name": "R_Weight"},
+        {"name": "F_UnsprungWeight"},
+        {"name": "R_UnsprungWeight"},
+        {"name": "F_TrackWidth"},
+        {"name": "R_TrackWidth"},
+        {"name": "F_COGHeight"},
+        {"name": "R_COGHeight"},
+        {"name": "F_RollCenterHeight"},
+        {"name": "R_RollCenterHeight"},
+        {"name": "one"},
+        {"name": "F_SprungWeight", "relationship": "F_Weight - F_UnsprungWeight"},
+        {"name": "R_SprungWeight", "relationship": "R_Weight - R_UnsprungWeight"},
+        {"name": "SprungWeight", "relationship": "F_SprungWeight + R_SprungWeight"},
+        {"name": "F_UnsprungWeightTfr", "relationship": "( F_UnsprungWeight * F_COGHeight ) / F_TrackWidth"},
+        {"name": "R_UnsprungWeightTfr", "relationship": "( R_UnsprungWeight * R_COGHeight ) / R_TrackWidth"},
+        {"name": "F_RollCenterWeightTfr", "relationship": "( F_SprungWeight * F_RollCenterHeight ) / F_TrackWidth"},
+        {"name": "R_RollCenterWeightTfr", "relationship": "( R_SprungWeight * R_RollCenterHeight ) / R_TrackWidth"},
+        {"name": "F_WeightDistribution", "relationship": "F_SprungWeight / SprungWeight"},
+        {"name": "R_WeightDistribution", "relationship": "one - F_WeightDistribution"},
+        {"name": "MeanCOGHeight", "relationship": "( ( R_COGHeight - F_COGHeight ) * R_WeightDistribution ) + F_COGHeight"},
+        {"name": "MeanRollCenter", "relationship": "( ( R_RollCenterHeight - F_RollCenterHeight ) * R_WeightDistribution ) + F_RollCenterHeight"},
+        {"name": "MeanTrack", "relationship": "( ( R_TrackWidth - F_TrackWidth ) * R_WeightDistribution ) + F_TrackWidth"},
+        {"name": "RollCenterCOGLeverArm", "relationship": "MeanCOGHeight - MeanRollCenter"}
+    ],
+    "start_conditions": {
+        "F_Weight": 500.0,
+        "R_Weight": 500.0,
+        "F_UnsprungWeight": 50.0,
+        "R_UnsprungWeight": 65.0,
+        "F_TrackWidth": 1200.0,
+        "R_TrackWidth": 1250.0,
+        "F_COGHeight": 50.0,
+        "R_COGHeight": 50.0,
+        "F_RollCenterHeight": 10.0,
+        "R_RollCenterHeight": 10.0,
+        "one": 1.00
+    }
+}
