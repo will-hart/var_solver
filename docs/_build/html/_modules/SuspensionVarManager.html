@@ -1,0 +1,308 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>SuspensionVarManager &mdash; Graph Variable Solver 0.1.1 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="Graph Variable Solver 0.1.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Graph Variable Solver 0.1.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for SuspensionVarManager</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">igraph</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">S</span>
+
+<span class="kn">from</span> <span class="nn">SuspensionVar</span> <span class="kn">import</span> <span class="n">SuspensionVar</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SuspensionVarManager"><a class="viewcode-back" href="../variablemanager.html#SuspensionVarManager.SuspensionVarManager">[docs]</a><span class="k">class</span> <span class="nc">SuspensionVarManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Builds a list of SuspensionVar objects, calculates a dependency graph</span>
+<span class="sd">    and then requests inputs for variables which are not dependent on any</span>
+<span class="sd">    other variable.  </span>
+
+<span class="sd">    It then traverses the graph and solves the variables, finally printing </span>
+<span class="sd">    the result for the user.</span>
+<span class="sd">    </span>
+<span class="sd">    Code: William Hart (11082131@brookes.ac.uk)</span>
+<span class="sd">    License: MIT</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_vars</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># SuspensionVar objects to be solved</span>
+    <span class="n">_graph</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># dependency digraph</span>
+    <span class="n">_results</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># generated results</span>
+    <span class="n">_inputs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># variables with no dependencies</span>
+    <span class="n">_incomplete</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c"># is our analysis incomplete</span>
+    <span class="n">_result_str</span> <span class="o">=</span> <span class="s">&quot;&quot;</span> <span class="c"># A string to hold result output</span>
+
+<div class="viewcode-block" id="SuspensionVarManager.add_var"><a class="viewcode-back" href="../variablemanager.html#SuspensionVarManager.SuspensionVarManager.add_var">[docs]</a>    <span class="k">def</span> <span class="nf">add_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">eq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Builds a new variable and adds it based on a given name and equation&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Error</span><span class="p">(</span><span class="s">&quot;The variable </span><span class="si">%s</span><span class="s"> is already defined&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SuspensionVar</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">eq</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="SuspensionVarManager.set_verbose"><a class="viewcode-back" href="../variablemanager.html#SuspensionVarManager.SuspensionVarManager.set_verbose">[docs]</a>    <span class="k">def</span> <span class="nf">set_verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets verbose logging for the variable manager&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SuspensionVarManager.resolve"><a class="viewcode-back" href="../variablemanager.html#SuspensionVarManager.SuspensionVarManager.resolve">[docs]</a>    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolves the variables based on the given inputs and prints the result&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_build_dependency_graph</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_traverse_solve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolve_inputs</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_outputs</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="SuspensionVarManager.load_json"><a class="viewcode-back" href="../variablemanager.html#SuspensionVarManager.SuspensionVarManager.load_json">[docs]</a>    <span class="k">def</span> <span class="nf">load_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads variable groupings from a json string&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Loading data from JSON&quot;</span><span class="p">)</span>
+        
+        <span class="c"># get the json object and check for variables</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;variables&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;JSON has no &#39;vars&#39; dictionary - cannot process&quot;</span><span class="p">)</span>
+        
+        <span class="c"># load in all the vars</span>
+        <span class="n">js_vars</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="s">&#39;variables&#39;</span><span class="p">]</span>
+        
+        <span class="c"># load the variables</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot; &gt;&gt; Loading variables from JSON&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">js_vars</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;      - Loading </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">var</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s">&quot;relationship&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;             relationship: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">var</span><span class="p">[</span><span class="s">&#39;relationship&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s">&quot;name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;Unable to find variable name - </span><span class="si">%s</span><span class="s"> - aborting load by JSON&quot;</span> <span class="o">%</span> <span class="n">var</span><span class="p">)</span>
+            <span class="n">reln</span> <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="s">&#39;relationship&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s">&quot;relationship&quot;</span> <span class="ow">in</span> <span class="n">var</span> <span class="k">else</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SuspensionVar</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">reln</span><span class="o">=</span><span class="n">reln</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot; &gt;&gt; Variables loaded&quot;</span><span class="p">)</span>
+
+        <span class="c"># load the initial conditions, if present</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot; &gt;&gt; Loading start conditions&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;start_conditions&quot;</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;      - Some conditions are present&quot;</span><span class="p">)</span>
+            <span class="n">start_conds</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="s">&#39;start_conditions&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">start_conds</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;             Loading </span><span class="si">%s</span><span class="s"> (value </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">start_conds</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="n">start_conds</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot; &gt;&gt; Start condition load complete&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot; &gt;&gt; JSON load complete&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SuspensionVarManager.get_output"><a class="viewcode-back" href="../variablemanager.html#SuspensionVarManager.SuspensionVarManager.get_output">[docs]</a>    <span class="k">def</span> <span class="nf">get_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the result output as a string&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_str</span>
+</div>
+    <span class="k">def</span> <span class="nf">_build_dependency_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Builds up variable dependencies by building a network from the variables&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Building dependency graph&quot;</span><span class="p">)</span>
+
+        <span class="c"># returns a new graph object containing a minimum spanning tree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">igraph</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">directed</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+        <span class="c"># add vertices from vars and build edge list</span>
+        <span class="c"># do a quick check to make sure we only add </span>
+        <span class="c"># each edge once.</span>
+        <span class="n">depend_edges</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_vertex</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get_name</span><span class="p">(),</span> <span class="n">obj</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">get_dependency_list</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">dep</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">depend_edges</span><span class="p">:</span>
+                    <span class="n">depend_edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
+
+        <span class="c"># add edges</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">depend_edges</span><span class="p">)</span>
+        
+        <span class="c"># write out the whole dependency graph</span>
+        <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+            <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">layout</span><span class="p">(</span><span class="s">&quot;fr&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="s">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">igraph</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="s">&quot;dependencies_0.pdf&quot;</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+        
+        <span class="c"># return the solving tree to the caller</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot; &gt;&gt; Dependency graph complete&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_resolve_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determines variables with no dependencies and gets their starting value&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Finding missing inputs&quot;</span><span class="p">)</span>
+        <span class="n">no_pre</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">vs</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">predecessors</span><span class="p">()</span> <span class="o">==</span> <span class="p">[]]</span>
+
+        <span class="c"># copy all pre-defined inputs across to results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c"># work out if any input variables are missing</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">no_pre</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">v</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="nb">raw_input</span><span class="p">(</span><span class="s">&quot;Please enter a value for </span><span class="si">%s</span><span class="s">: &quot;</span> <span class="o">%</span> <span class="n">v</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]))</span>               
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot; &gt;&gt; missing inputs complete&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">no_pre</span>
+
+    <span class="k">def</span> <span class="nf">_traverse_solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_roots</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Traverses the dependency graph, solving as it goes&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;=============================&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;       Starting solve&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;=============================&quot;</span><span class="p">)</span>
+        
+        <span class="c"># Save initial conditions</span>
+        <span class="n">no_pre</span> <span class="o">=</span> <span class="n">initial_roots</span>
+        
+        <span class="c"># output initial conditions</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;      INITIAL GIVENS:&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">no_pre</span><span class="p">]))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;-----------------------------&quot;</span><span class="p">)</span>
+        <span class="n">plot_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c"># process until we have leftover variables</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">no_pre</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># solve each block with no predecessors</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Assessing </span><span class="si">%s</span><span class="s"> variables with no predecessors&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">no_pre</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;--------------------------------------------&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">no_pre</span><span class="p">[:]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="s">&#39;obj&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">)</span>
+
+            <span class="c"># remove nodes that have been processed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">delete_vertices</span><span class="p">(</span><span class="n">no_pre</span><span class="p">)</span>
+            
+            <span class="c"># write new dependency graph if required</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">vs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">plot_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">layout</span><span class="p">(</span><span class="s">&quot;fr&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="s">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="n">igraph</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="s">&quot;dependencies_</span><span class="si">%s</span><span class="s">.pdf&quot;</span> <span class="o">%</span> <span class="n">plot_counter</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+
+            <span class="c"># get new nodes for processing</span>
+            <span class="n">no_pre</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">vs</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">predecessors</span><span class="p">()</span> <span class="o">==</span> <span class="p">[]]</span>
+        
+        <span class="c"># if we have no nodes left, unset &quot;incomplete&quot; flag</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">vs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_incomplete</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot; &gt;&gt; Solve complete&quot;</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_generate_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the output dictionary in &quot;pretty printed&quot; format&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Generating output string&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;----------------------------------------------------------</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;             Suspension Variable Solver - OUTPUT </span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;----------------------------------------------------------</span><span class="se">\n\n</span><span class="s">&quot;</span>
+        
+        <span class="c"># check if we have incomplete solve</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_incomplete</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;  UNABLE TO SOLVE ALL VARIABLES!</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;  SOLVED ALL VARIABLES.</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;----------------------------------------------------------</span><span class="se">\n</span><span class="s">&quot;</span>
+        
+        <span class="c"># write out the results, starting with inputs</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;    INPUTS: </span><span class="se">\n\n</span><span class="s">&quot;</span>
+        
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;           &gt;</span><span class="se">\t</span><span class="si">%s</span><span class="s">: </span><span class="si">%0.4f</span><span class="se">\n</span><span class="s">&quot;</span>  <span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;----------------------------------------------------------</span><span class="se">\n\n</span><span class="s">&quot;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;    RESULTS: </span><span class="se">\n\n</span><span class="s">&quot;</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;           &gt;</span><span class="se">\t</span><span class="si">%s</span><span class="s">: </span><span class="si">%0.4f</span><span class="se">\n</span><span class="s">&quot;</span>  <span class="o">%</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s">&quot;----------------------------------------------------------</span><span class="se">\n</span><span class="s">&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot; &gt;&gt; output generated&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_result_str</span> <span class="o">=</span> <span class="n">ret</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Graph Variable Solver 0.1.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2013, William Hart.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

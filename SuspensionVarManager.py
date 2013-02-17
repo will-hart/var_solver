@@ -1,3 +1,11 @@
+"""
+SuspensionVarManager is a variable manager class for the Graph Variable Solver 
+module. It generates a graph of variable relationships and solves relationships
+in an intelligent order.
+
+Code: William Hart (11082131@brookes.ac.uk)
+License: MIT
+"""
 import igraph
 import json
 import logging
@@ -17,9 +25,6 @@ class SuspensionVarManager(object):
 
     It then traverses the graph and solves the variables, finally printing 
     the result for the user.
-    
-    Code: William Hart (11082131@brookes.ac.uk)
-    License: MIT
     """
 
     _vars = []  # SuspensionVar objects to be solved

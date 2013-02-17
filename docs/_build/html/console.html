@@ -1,0 +1,181 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>Calling from the Console &mdash; Graph Variable Solver 0.1.1 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/searchtools.js"></script>
+    <link rel="top" title="Graph Variable Solver 0.1.1 documentation" href="index.html" />
+    <link rel="prev" title="Input Format" href="inputformat.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="inputformat.html" title="Input Format"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Graph Variable Solver 0.1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="calling-from-the-console">
+<h1>Calling from the Console<a class="headerlink" href="#calling-from-the-console" title="Permalink to this headline">¶</a></h1>
+<p>A console helper file <cite>solver.py</cite> is supplied for quick testing of
+the Graph Solver.</p>
+<div class="section" id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Permalink to this headline">¶</a></h2>
+<p>You can display a custom help message by typing:</p>
+<div class="highlight-python"><pre>python solver.py -h</pre>
+</div>
+</div>
+<div class="section" id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<p>The most basic usage is to take an input file and print the output to console:</p>
+<div class="highlight-python"><pre>python solver.py data/sample_data.json</pre>
+</div>
+</div>
+<div class="section" id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="n-no-plot">
+<h3>-n, &#8211;no-plot<a class="headerlink" href="#n-no-plot" title="Permalink to this headline">¶</a></h3>
+<p>Solve without creating PDF outputs for dependency graphs:</p>
+<div class="highlight-python"><pre>python solver.py -n data/sample_data.json</pre>
+</div>
+</div>
+<div class="section" id="o-out">
+<h3>-o, &#8211;out<a class="headerlink" href="#o-out" title="Permalink to this headline">¶</a></h3>
+<p>Specify a file name for writing outputs:</p>
+<div class="highlight-python"><pre>python solver.py -o output.txt data/sample_data.json</pre>
+</div>
+<p>Note that this is not compatible with the <cite>&#8211;verbose</cite> option.  To write a full
+log to a file, including debugging outputs, use:</p>
+<div class="highlight-python"><pre>python solver.py -v data/sample_data.json &gt; output.txt</pre>
+</div>
+</div>
+<div class="section" id="version">
+<h3>&#8211;version<a class="headerlink" href="#version" title="Permalink to this headline">¶</a></h3>
+<p>Display the version number and exit:</p>
+<div class="highlight-python"><pre>python solver.py --version</pre>
+</div>
+</div>
+<div class="section" id="v-verbose">
+<h3>-v, &#8211;verbose<a class="headerlink" href="#v-verbose" title="Permalink to this headline">¶</a></h3>
+<p>Run the program in &#8216;verbose&#8217; mode, printing messages to console:</p>
+<div class="highlight-python"><pre>python solver.py -v data/sample_data.json</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Calling from the Console</a><ul>
+<li><a class="reference internal" href="#getting-help">Getting Help</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#options">Options</a><ul>
+<li><a class="reference internal" href="#n-no-plot">-n, &#8211;no-plot</a></li>
+<li><a class="reference internal" href="#o-out">-o, &#8211;out</a></li>
+<li><a class="reference internal" href="#version">&#8211;version</a></li>
+<li><a class="reference internal" href="#v-verbose">-v, &#8211;verbose</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="inputformat.html"
+                        title="previous chapter">Input Format</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/console.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="inputformat.html" title="Input Format"
+             >previous</a> |</li>
+        <li><a href="index.html">Graph Variable Solver 0.1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2013, William Hart.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

@@ -1,3 +1,11 @@
+"""
+SuspensionVar is a variable wrapper class for the Graph Variable Solver 
+module.
+
+Code: William Hart (11082131@brookes.ac.uk)
+License: MIT
+"""
+
 import logging
 from sympy import S, Symbol
 
@@ -22,8 +30,6 @@ class SuspensionVar(object):
     Note that Python uses `**` for powers, not the more common `^`.  As Sympy 
     automatically converts these operators, use of either is permitted.
 
-    Code: William Hart (11082131@brookes.ac.uk)
-    License: MIT
     """
 
     _name = ""                      # the name of this symbol
