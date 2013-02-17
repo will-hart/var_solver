@@ -1,0 +1,40 @@
+{
+    "variables": [
+        {"name": "AccelerationForce"},
+        {"name": "BrakeForce"},
+        {"name": "CornerForce"},
+        {"name": "WheelRadius"},
+        {"name": "BrakeTorque", "relationship": "BrakeForce * WheelRadius"},
+        {"name": "UpperWishboneBrakeForce", "relationship": "BrakeForce * ((WheelRadius-b)/(a+b))"},
+        {"name": "LowerWishboneBrakeForce", "relationship": "BrakeForce * ((WheelRadius+a)/(a+b))"},
+        {"name": "UpperWishboneAccelerationForce", "relationship": "AccelerationForce * (b/(a+b))"},
+        {"name": "LowerWishboneAccelerationForce", "relationship": "AccelerationForce * (b/(a+b))"},
+        {"name": "UpperWishboneCorneringForce", "relationship": "CornerForce * ((WheelRadius-b)/(a+b))"},
+        {"name": "LowerWishboneCorneringForce", "relationship": "-CornerForce * ((WheelRadius+a)/(a+b))"},
+        {"name": "SteeringArmForce", "relationship": "BrakeForce * (p/q)"},
+        {"name": "UpperBallJointY"},
+        {"name": "LowerBallJointY"},
+        {"name": "StubAxleY"},
+        {"name": "KingPinX"},
+        {"name": "BrakeForceX"},
+        {"name": "SteeringArmX"},
+        {"name": "a", "relationship": "UpperBallJointY - StubAxleY"},
+        {"name": "b", "relationship": "StubAxleY - LowerBallJointY"},
+        {"name": "p", "relationship": "Abs(BrakeForceX - KingPinX)"},
+        {"name": "q", "relationship": "Abs(SteeringArmX - KingPinX)"},
+        {"name": "Fitness", "relationship": "1000-(Abs(UpperWishboneBrakeForce - LowerWishboneBrakeForce)+Abs(UpperWishboneCorneringForce - LowerWishboneCorneringForce)+Abs(UpperWishboneAccelerationForce - LowerWishboneAccelerationForce)+10*SteeringArmForce)"}
+    ],
+    "start_conditions": {
+        "AccelerationForce": "100",
+        "BrakeForce": "100",
+        "CornerForce": "100",
+        "WheelRadius": "120",
+        "StubAxleY": "110",        
+        "KingPinX": "50",
+
+        "UpperBallJointY": "150",
+        "LowerBallJointY": "75",
+        "BrakeForceX": "45",
+        "SteeringArmX": "10"
+    }
+}
