@@ -174,12 +174,12 @@ class SuspensionVarManager(object):
         # write out the results, starting with inputs
         ret += "    INPUTS: \n\n"
         
-        for k in self._inputs:
+        for k in sorted(self._inputs.keys()):
             ret += "           >\t%s: %0.4f\n"  %(k, self._inputs[k])
         
         ret += "----------------------------------------------------------\n\n"
         ret += "    RESULTS: \n\n"
-        for k in self._results:
+        for k in sorted(self._results.keys()):
             ret += "           >\t%s: %0.4f\n"  %(k, self._results[k])
         
         ret += "----------------------------------------------------------\n"
