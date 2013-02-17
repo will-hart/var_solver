@@ -1,0 +1,171 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>GraphVariable &mdash; Graph Variable Solver 0.1.1 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/searchtools.js"></script>
+    <link rel="top" title="Graph Variable Solver 0.1.1 documentation" href="index.html" />
+    <link rel="next" title="Input Format" href="inputformat.html" />
+    <link rel="prev" title="GraphManager" href="graphmanager.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="inputformat.html" title="Input Format"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="graphmanager.html" title="GraphManager"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Graph Variable Solver 0.1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-GraphVariable">
+<span id="graphvariable"></span><h1>GraphVariable<a class="headerlink" href="#module-GraphVariable" title="Permalink to this headline">¶</a></h1>
+<p>GraphVariable is a variable wrapper class for the Graph Variable Solver 
+module.</p>
+<p>Code: William Hart (<a class="reference external" href="mailto:11082131&#37;&#52;&#48;brookes&#46;ac&#46;uk">11082131<span>&#64;</span>brookes<span>&#46;</span>ac<span>&#46;</span>uk</a>)
+License: MIT</p>
+<dl class="class">
+<dt id="GraphVariable.GraphVariable">
+<em class="property">class </em><tt class="descclassname">GraphVariable.</tt><tt class="descname">GraphVariable</tt><big>(</big><em>name</em>, <em>reln=None</em><big>)</big><a class="reference internal" href="_modules/GraphVariable.html#GraphVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GraphVariable.GraphVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>A basic class for representing relationships between variables
+Relationships can be defined using variable names and &#8220;solved&#8221; 
+for a given set of inputs.</p>
+<p>The dependent and independent variables are determined as 
+well as a the dependency graph.</p>
+<p>The Python library &#8220;sympy&#8221; (in particular sympify) is used to parse 
+the variables which means that a wide range of expressions are possible.
+For instance a valid expression would be:</p>
+<blockquote>
+<div>(A_Var + Another_Var)/(2 * A_Third_Var^2)</div></blockquote>
+<p>Note that Python uses <cite>**</cite> for powers, not the more common <cite>^</cite>.  As Sympy 
+automatically converts these operators, use of either is permitted.</p>
+<dl class="method">
+<dt id="GraphVariable.GraphVariable.get_dependency_list">
+<tt class="descname">get_dependency_list</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/GraphVariable.html#GraphVariable.get_dependency_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GraphVariable.GraphVariable.get_dependency_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of variable dependencies for this variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GraphVariable.GraphVariable.get_name">
+<tt class="descname">get_name</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/GraphVariable.html#GraphVariable.get_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GraphVariable.GraphVariable.get_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the name of this variable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GraphVariable.GraphVariable.solve">
+<tt class="descname">solve</tt><big>(</big><em>input_vars</em><big>)</big><a class="reference internal" href="_modules/GraphVariable.html#GraphVariable.solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GraphVariable.GraphVariable.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a dictionary of input vars and calculates the output value
+based on the relationship.  This value is saved to the dictionary
+and the dictionary is returned</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="graphmanager.html"
+                        title="previous chapter">GraphManager</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="inputformat.html"
+                        title="next chapter">Input Format</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/graphvariable.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="inputformat.html" title="Input Format"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="graphmanager.html" title="GraphManager"
+             >previous</a> |</li>
+        <li><a href="index.html">Graph Variable Solver 0.1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2013, William Hart.
+  Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+  <br />Theme based on <a href="http://readthedocs.org/">Read The Docs</a>
+
+</div>
+
+
+
+
+
+  </body>
+</html>

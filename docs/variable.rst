@@ -1,6 +1,0 @@
-
-Variable
-=====================
-
-.. automodule:: SuspensionVar
-   :members:
