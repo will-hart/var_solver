@@ -6,7 +6,7 @@ Code: William Hart (hart.wl@gmail.com)
 License: MIT
 """
 import argparse
-from SuspensionVarManager import SuspensionVarManager
+from GraphManager import GraphManager
 
 # parse the arguments
 parser = argparse.ArgumentParser(description="Solves complex relationships between variables")
@@ -32,7 +32,7 @@ with open(args.datafile) as f:
     raw_json = f.read()
 
 # create the variable manager
-vm = SuspensionVarManager()
+vm = GraphManager()
 
 # check for verbose flag
 if args.verbose:

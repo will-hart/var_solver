@@ -1,5 +1,5 @@
 """
-SuspensionVar is a variable wrapper class for the Graph Variable Solver 
+GraphVariable is a variable wrapper class for the Graph Variable Solver 
 module.
 
 Code: William Hart (11082131@brookes.ac.uk)
@@ -12,11 +12,11 @@ from sympy import S, Symbol
 logger = logging.getLogger(__name__)
 
 
-class SuspensionVar(object):
+class GraphVariable(object):
     """
     A basic class for representing relationships between variables
-    in suspension geometry. Relationships can be defined using 
-    variable names and "solved" for a given set of inputs.
+    Relationships can be defined using variable names and "solved" 
+    for a given set of inputs.
 
     The dependent and independent variables are determined as 
     well as a the dependency graph.

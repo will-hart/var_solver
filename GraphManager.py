@@ -1,5 +1,5 @@
 """
-SuspensionVarManager is a variable manager class for the Graph Variable Solver 
+GraphManager is a variable manager class for the Graph Variable Solver 
 module. It generates a graph of variable relationships and solves relationships
 in an intelligent order.
 
@@ -11,15 +11,15 @@ import json
 import logging
 from sympy import S
 
-from SuspensionVar import SuspensionVar
+from GraphVariable import GraphVariable
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 
-class SuspensionVarManager(object):
+class GraphManager(object):
     """
-    Builds a list of SuspensionVar objects, calculates a dependency graph
+    Builds a list of GraphVariable objects, calculates a dependency graph
     and then requests inputs for variables which are not dependent on any
     other variable.  
 
@@ -27,7 +27,7 @@ class SuspensionVarManager(object):
     the result for the user.
     """
 
-    _vars = []  # SuspensionVar objects to be solved
+    _vars = []  # GraphVariable objects to be solved
     _graph = None  # dependency digraph
     _results = {}  # generated results
     _inputs = {}  # variables with no dependencies
@@ -38,7 +38,7 @@ class SuspensionVarManager(object):
         """Builds a new variable and adds it based on a given name and equation"""
         if name in self._vars:
             raise Error("The variable %s is already defined" % name)
-        self._vars.append(SuspensionVar(name, eq))
+        self._vars.append(GraphVariable(name, eq))
 
     def set_verbose(self):
         """Sets verbose logging for the variable manager"""
@@ -71,7 +71,7 @@ class SuspensionVarManager(object):
             if "name" not in var:
                 raise AttributeError("Unable to find variable name - %s - aborting load by JSON" % var)
             reln = var['relationship'] if "relationship" in var else None
-            self._vars.append(SuspensionVar(var['name'], reln=reln))
+            self._vars.append(GraphVariable(var['name'], reln=reln))
         logger.debug(" >> Variables loaded")
 
         # load the initial conditions, if present
@@ -180,7 +180,7 @@ class SuspensionVarManager(object):
         logger.info("Generating output string")
         ret = ""
         ret += "----------------------------------------------------------\n"
-        ret += "             Suspension Variable Solver - OUTPUT \n"
+        ret += "             Graph Variable Solver - OUTPUT \n"
         ret += "----------------------------------------------------------\n\n"
         
         # check if we have incomplete solve
