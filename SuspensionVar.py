@@ -1,4 +1,8 @@
+import logging
 from sympy import S, Symbol
+
+logger = logging.getLogger(__name__)
+
 
 class SuspensionVar(object):
     """
@@ -50,8 +54,8 @@ class SuspensionVar(object):
         based on the relationship.  This value is saved to the dictionary
         and the dictionary is returned
         """
-        print "Solving %s = %s" % (self._name, 
-            self._relationship if self._relationship else input_vars[self._name])
+        logger.debug("Solving %s = %s" % (self._name, 
+            self._relationship if self._relationship else input_vars[self._name]))
 
         # check if we have anything to solve
         if not self._relationship:
@@ -67,7 +71,7 @@ class SuspensionVar(object):
 
         # perform the calculation
         op = self._expression.subs(inputs)
-        print "     = %s" % op
+        logger.debug("     = %s" % op)
         
         # update the dictionary and return
         input_vars[self._name] = op

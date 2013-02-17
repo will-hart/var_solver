@@ -22,6 +22,7 @@ parser.add_argument('-o', "--out",
     default=None
 )
 parser.add_argument('--version', action='version', version='%(prog)s 0.1')
+parser.add_argument('-v', '--verbose', action='store_true', default=False, help="Show verbose messages")
 args = parser.parse_args()
 
 # get the json from the file
@@ -30,14 +31,20 @@ raw_json = ""
 with open(args.datafile) as f:
     raw_json = f.read()
 
-# Solve and print output to screen
+# create the variable manager
 vm = SuspensionVarManager()
+
+# check for verbose flag
+if args.verbose:
+    vm.set_verbose()
+
+# Solve and print output to screen
 vm.load_json(raw_json)
-result = vm.resolve(args.no_plot)
+vm.resolve(args.no_plot)
 
 # check if we are printing or outputting results
 if args.out:
     with open(args.out, 'w') as f:
-        f.write(result)
+        f.write(vm.get_output())
 else:
-    print result
+    print vm.get_output()
