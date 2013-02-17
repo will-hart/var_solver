@@ -1,0 +1,6 @@
+
+GraphManager
+=====================
+
+.. automodule:: GraphManager
+   :members:

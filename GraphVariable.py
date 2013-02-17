@@ -1,10 +1,22 @@
+"""
+GraphVariable is a variable wrapper class for the Graph Variable Solver 
+module.
+
+Code: William Hart (11082131@brookes.ac.uk)
+License: MIT
+"""
+
+import logging
 from sympy import S, Symbol
 
-class SuspensionVar(object):
+logger = logging.getLogger(__name__)
+
+
+class GraphVariable(object):
     """
     A basic class for representing relationships between variables
-    in suspension geometry. Relationships can be defined using 
-    variable names and "solved" for a given set of inputs.
+    Relationships can be defined using variable names and "solved" 
+    for a given set of inputs.
 
     The dependent and independent variables are determined as 
     well as a the dependency graph.
@@ -18,8 +30,6 @@ class SuspensionVar(object):
     Note that Python uses `**` for powers, not the more common `^`.  As Sympy 
     automatically converts these operators, use of either is permitted.
 
-    Code: William Hart (11082131@brookes.ac.uk)
-    License: MIT
     """
 
     _name = ""                      # the name of this symbol
@@ -50,8 +60,8 @@ class SuspensionVar(object):
         based on the relationship.  This value is saved to the dictionary
         and the dictionary is returned
         """
-        print "Solving %s = %s" % (self._name, 
-            self._relationship if self._relationship else input_vars[self._name])
+        logger.debug("Solving %s = %s" % (self._name, 
+            self._relationship if self._relationship else input_vars[self._name]))
 
         # check if we have anything to solve
         if not self._relationship:
@@ -67,7 +77,7 @@ class SuspensionVar(object):
 
         # perform the calculation
         op = self._expression.subs(inputs)
-        print "     = %s" % op
+        logger.debug("     = %s" % op)
         
         # update the dictionary and return
         input_vars[self._name] = op
