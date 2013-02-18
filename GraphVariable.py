@@ -52,7 +52,7 @@ class GraphVariable(object):
         this variable
         """
         self._expression = S(reln)
-        self._depends_on = [str(x) for x in self._expression.atoms(Symbol)]
+        self._depends_on = sorted([str(x) for x in self._expression.atoms(Symbol)])
 
     def solve(self, input_vars):
         """
