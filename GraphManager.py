@@ -55,7 +55,7 @@ class GraphManager(object):
 
     def resolve(self, plot=True):
         """Resolves the variables based on the given inputs and prints the result"""
-        self._traverse_solve(self._resolve_inputs())
+        self._traverse_solve(plot)
         self._generate_outputs()
 
     def load_json(self, json_str):
@@ -126,23 +126,7 @@ class GraphManager(object):
         # return the solving tree to the caller
         logger.info(" >> Dependency graph complete")
 
-    def _resolve_inputs(self):
-        """Determines variables with no dependencies and gets their starting value"""
-        logger.info("Finding missing inputs")
-        no_pre = [x for x in self._graph.vs if x.predecessors() == []]
-
-        # copy all pre-defined inputs across to results
-        self._results = self._inputs.copy()
-
-        # work out if any input variables are missing
-        for v in no_pre:
-            if v['name'] not in self._results:
-                self._results[v['name']] = S(raw_input("Please enter a value for %s: " % v['name']))               
-
-        logger.info(" >> missing inputs complete")
-        return no_pre
-
-    def _traverse_solve(self, initial_roots, plot=True):
+    def _traverse_solve(self, plot):
     
         # write out the whole dependency graph
         if plot:
@@ -156,7 +140,10 @@ class GraphManager(object):
         logger.debug("=============================")
         
         # Save initial conditions
-        no_pre = initial_roots
+        self._results = self._inputs
+
+        # get the nodes without predecessors to start nibbling at
+        no_pre = [x for x in self._graph.vs if x.predecessors() == []]
         
         # output initial conditions
         logger.debug("      INITIAL GIVENS:")

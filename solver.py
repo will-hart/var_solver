@@ -48,3 +48,20 @@ if args.out:
         f.write(vm.get_output())
 else:
     print vm.get_output()
+    
+
+def _resolve_inputs(self):
+    """Determines variables with no dependencies and gets their starting value"""
+    logger.info("Finding missing inputs")
+    no_pre = [x for x in self._graph.vs if x.predecessors() == []]
+
+    # copy all pre-defined inputs across to results
+    self._results = self._inputs.copy()
+
+    # work out if any input variables are missing
+    for v in no_pre:
+        if v['name'] not in self._results:
+            self._results[v['name']] = S(raw_input("Please enter a value for %s: " % v['name']))               
+
+    logger.info(" >> missing inputs complete")
+    return no_pre

@@ -49,18 +49,30 @@ class TestGraphManager(unittest.TestCase):
         self.assertEquals(len(gm._inputs), 2)
         self.assertEquals(gm._inputs["a"], sp.S("1"))
 
-    def test_solver(self):
-        self.assertTrue(False)
-
     def test_unspecified_vars(self):
         gm = GraphManager()
         js_str = ""
-        with open("test_data/basic.json", "r") as f:
+        with open("test_data/basic_incomplete.json", "r") as f:
             js_str = f.read()
         gm.load_json(js_str)
         
         self.assertEquals(gm.get_missing_vars(), ['e'])
 
+    def test_solver_complete(self):
+        gm = GraphManager()
+        js_str = ""
+        with open("test_data/basic.json", "r") as f:
+            js_str = f.read()
+        gm.load_json(js_str)
+        gm.resolve(False)
+
+    def test_solver_incomplete(self):
+        gm = GraphManager()
+        js_str = ""
+        with open("test_data/basic_incomplete.json", "r") as f:
+            js_str = f.read()
+        gm.load_json(js_str)
+        gm.resolve(False)
 
 class TestGraphVariable(unittest.TestCase):
     """Run some basic unit tests on the GraphVariable class"""
