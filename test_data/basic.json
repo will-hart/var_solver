@@ -1,0 +1,13 @@
+{
+    "variables": [
+        {"name": "a"},
+        {"name": "b"},
+        {"name": "c","relationship": "a * b"},
+        {"name": "d","relationship": "c + a + b"},
+        {"name": "e","relationship": "a + b + c + d"}
+    ],
+    "start_conditions": {
+        "a": "1",
+        "b": "2"
+    }
+}

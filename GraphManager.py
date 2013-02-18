@@ -57,7 +57,7 @@ class GraphManager(object):
         self._build_dependency_graph(plot)
         self._traverse_solve(self._resolve_inputs())
         self._generate_outputs()
-    
+
     def load_json(self, json_str):
         """Loads variable groupings from a json string"""
         logger.info("Loading data from JSON")
