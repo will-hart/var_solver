@@ -2,6 +2,7 @@ import unittest
 import sympy as sp
 
 from GraphManager import GraphManager
+from GraphExceptions import SolverException, ConfigurationException
 from GraphVariable import GraphVariable
 
 
@@ -18,7 +19,7 @@ class TestGraphManager(unittest.TestCase):
     def test_add_variable_twice_raises_attribute_error(self):
         gm = GraphManager()
         v = gm.add_variable("a", "b+c")
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ConfigurationException):
             gm.add_variable("a", "d+e")
 
     def test_loads_json(self):
@@ -83,7 +84,7 @@ class TestGraphVariable(unittest.TestCase):
     def test_solve_with_missing_inputs_raises_attribute_error(self):
         v = GraphVariable("a", "b+c")
         inputs = {"b":1}
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(SolverException):
             v.solve(inputs)
     
     def test_solve_retains_unrequired_inputs(self):
@@ -97,7 +98,7 @@ class TestGraphVariable(unittest.TestCase):
         self.assertEqual(result['a'], 3)
 
     def test_relationship_references_self_throws_attribute_error(self):
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ConfigurationException):
             v = GraphVariable("a","a+b")
 
 

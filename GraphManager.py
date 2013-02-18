@@ -12,6 +12,7 @@ import logging
 from sympy import S
 
 from GraphVariable import GraphVariable
+from GraphExceptions import SolverException, ConfigurationException
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ class GraphManager(object):
     def add_variable(self, name, eq):
         """Builds a new variable and adds it based on a given name and equation"""
         if name in [x.get_name() for x in self._vars]:
-            raise AttributeError("The variable %s is already defined" % name)
+            raise ConfigurationException("The variable %s is already defined" % name)
         v = GraphVariable(name, eq)
         self._vars.append(v)
         return v
@@ -65,7 +66,7 @@ class GraphManager(object):
         # get the json object and check for variables
         obj = json.loads(json_str)
         if "variables" not in obj:
-            raise AttributeError("JSON has no 'vars' dictionary - cannot process")
+            raise ConfigurationException("JSON has no 'vars' dictionary - cannot process")
         
         # load in all the vars
         js_vars = obj['variables']
@@ -213,3 +214,4 @@ class GraphManager(object):
 
         logger.info(" >> output generated")
         self._result_str = ret
+

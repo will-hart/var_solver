@@ -9,6 +9,8 @@ License: MIT
 import logging
 from sympy import S, Symbol
 
+from GraphExceptions import SolverException, ConfigurationException
+
 logger = logging.getLogger(__name__)
 
 
@@ -55,7 +57,7 @@ class GraphVariable(object):
         self._depends_on = sorted([str(x) for x in self._expression.atoms(Symbol)])
         
         if self._name in self._depends_on:
-            raise AttributeError("The relationship defined for variable %s depends on itself!" % self._name)
+            raise ConfigurationException("The relationship defined for variable %s depends on itself!" % self._name)
 
     def solve(self, input_vars):
         """
@@ -74,7 +76,7 @@ class GraphVariable(object):
         inputs = {}
         for k in self._depends_on:
             if k not in input_vars:
-                raise AttributeError("Missing argument - expected %s in argument dictionary" % k)
+                raise SolverException("Missing argument - expected %s in argument dictionary" % k)
             else:
                 inputs[k] = input_vars[k]
 
