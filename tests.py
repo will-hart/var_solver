@@ -6,8 +6,23 @@ from GraphVariable import GraphVariable
 
 
 class TestGraphManager(unittest.TestCase):
-    def test_some_tests(self):
+    def test_finish_tests(self):
         self.assertTrue(False)
+
+    def test_add_variable(self):
+        gm = GraphManager()
+        v = gm.add_variable("a", "b+c")
+        self.assertEqual(v.get_name(), "a")
+        self.assertIn("b", v._depends_on)
+        self.assertIn("c", v._depends_on)
+        self.assertIn(v, gm._vars)
+
+    def test_add_variable_twice_raises_attribute_error(self):
+        
+        gm = GraphManager()
+        v = gm.add_variable("a", "b+c")
+        with self.assertRaises(AttributeError):
+            gm.add_variable("a", "d+e")
 
 
 class TestGraphVariable(unittest.TestCase):

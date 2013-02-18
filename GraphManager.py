@@ -34,11 +34,19 @@ class GraphManager(object):
     _incomplete = True  # is our analysis incomplete
     _result_str = "" # A string to hold result output
 
-    def add_var(self, name, eq):
+    def __init__(self):
+        self._vars = []
+        self._graph = None
+        self._results = {}
+        self._inputs = {}
+    
+    def add_variable(self, name, eq):
         """Builds a new variable and adds it based on a given name and equation"""
-        if name in self._vars:
-            raise Error("The variable %s is already defined" % name)
-        self._vars.append(GraphVariable(name, eq))
+        if name in [x.get_name() for x in self._vars]:
+            raise AttributeError("The variable %s is already defined" % name)
+        v = GraphVariable(name, eq)
+        self._vars.append(v)
+        return v
 
     def set_verbose(self):
         """Sets verbose logging for the variable manager"""
