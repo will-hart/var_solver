@@ -4,7 +4,7 @@
         {"name": "b"},
         {"name": "c","relationship": "a * b"},
         {"name": "d","relationship": "c + a + b"},
-        {"name": "e","relationship": "a + b + c + d"}
+        {"name": "e"}
     ],
     "start_conditions": {
         "a": "1",

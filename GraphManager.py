@@ -55,7 +55,6 @@ class GraphManager(object):
 
     def resolve(self, plot=True):
         """Resolves the variables based on the given inputs and prints the result"""
-        self._build_dependency_graph(plot)
         self._traverse_solve(self._resolve_inputs())
         self._generate_outputs()
 
@@ -93,10 +92,16 @@ class GraphManager(object):
                 self._inputs[var] = S(start_conds[var])
         logger.debug(" >> Start condition load complete")
         logger.info(" >> JSON load complete")
+        self._build_dependency_graph(False)
 
     def get_output(self):
         """Returns the result output as a string"""
         return self._result_str
+
+    def get_missing_vars(self):
+        """Gets variables missing from the inputs which have no predecessors"""
+        no_predecessors = set([x['obj'].get_name() for x in self._graph.vs if x.predecessors() == []])
+        return ([x for x in no_predecessors^set(self._inputs)])
 
     def _build_dependency_graph(self, plot):
         """Builds up variable dependencies by building a network from the variables"""
@@ -117,13 +122,7 @@ class GraphManager(object):
 
         # add edges
         self._graph.add_edges(depend_edges)
-        
-        # write out the whole dependency graph
-        if plot:
-            layout = self._graph.layout("fr")
-            self._graph.vs['label'] = self._graph.vs['name']
-            igraph.plot(self._graph, "dependencies_0.pdf", layout=layout)
-        
+                
         # return the solving tree to the caller
         logger.info(" >> Dependency graph complete")
 
@@ -143,7 +142,14 @@ class GraphManager(object):
         logger.info(" >> missing inputs complete")
         return no_pre
 
-    def _traverse_solve(self, initial_roots):
+    def _traverse_solve(self, initial_roots, plot=True):
+    
+        # write out the whole dependency graph
+        if plot:
+            layout = self._graph.layout("fr")
+            self._graph.vs['label'] = self._graph.vs['name']
+            igraph.plot(self._graph, "dependencies_0.pdf", layout=layout)   
+    
         """Traverses the dependency graph, solving as it goes"""
         logger.debug("=============================")
         logger.info("       Starting solve")
@@ -170,7 +176,7 @@ class GraphManager(object):
             self._graph.delete_vertices(no_pre)
             
             # write new dependency graph if required
-            if len(self._graph.vs) > 0:
+            if plot and len(self._graph.vs) > 0:
                 plot_counter += 1
                 layout = self._graph.layout("fr")
                 self._graph.vs['label'] = self._graph.vs['name']
