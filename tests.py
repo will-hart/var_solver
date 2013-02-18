@@ -6,8 +6,6 @@ from GraphVariable import GraphVariable
 
 
 class TestGraphManager(unittest.TestCase):
-    def test_finish_tests(self):
-        self.assertTrue(False)
 
     def test_add_variable(self):
         gm = GraphManager()

@@ -53,6 +53,9 @@ class GraphVariable(object):
         """
         self._expression = S(reln)
         self._depends_on = sorted([str(x) for x in self._expression.atoms(Symbol)])
+        
+        if self._name in self._depends_on:
+            raise AttributeError("The relationship defined for variable %s depends on itself!" % self._name)
 
     def solve(self, input_vars):
         """
