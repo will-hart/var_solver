@@ -8,6 +8,16 @@ License: MIT
 import argparse
 from GraphManager import GraphManager
 
+def resolve_inputs(manager):
+    """Determines variables with no dependencies and gets their starting value"""
+    missing = manager.get_missing_vars()
+    missing_dict = {}
+    
+    # work out if any input variables are missing
+    for v in missing:
+        missing_dict[v['name']] = S(raw_input("Please enter a value for %s: " % v['name']))
+    return missing_dict
+
 # parse the arguments
 parser = argparse.ArgumentParser(description="Solves complex relationships between variables")
 parser.add_argument('datafile', type=str, help="The JSON encoded file name containing variable data")
@@ -40,7 +50,8 @@ if args.verbose:
 
 # Solve and print output to screen
 vm.load_json(raw_json)
-vm.resolve(args.no_plot)
+init = resolve_inputs(vm)
+vm.resolve(init, args.no_plot)
 
 # check if we are printing or outputting results
 if args.out:

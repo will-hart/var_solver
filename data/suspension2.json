@@ -1,10 +1,24 @@
 {
     "variables": [
-        {"name": "AccelerationForce"},
-        {"name": "BrakeForce"},
-        {"name": "CornerForce"},
+        {"name": "FrictionCoefficient"},
+        {"name": "AccelerationMassFront"},
         {"name": "WheelRadius"},
-        {"name": "BrakeTorque", "relationship": "BrakeForce * WheelRadius"},
+        {"name": "BrakeMassFront"},
+        {"name": "CornerMassFront"},
+        {"name": "UpperBallJointY"},
+        {"name": "LowerBallJointY"},
+        {"name": "StubAxleY"},
+        {"name": "KingPinX"},
+        {"name": "BrakeForceX"},
+        {"name": "SteeringArmX"},
+        {"name": "g"},
+        {"name": "NormalBrakeForce", "relationship": "BrakeMassFront * g"},
+        {"name": "NormalCornerForce", "relationship": "CornerMassFront * g"},
+        {"name": "NormalAccelerationForce", "relationship": "AccelerationMassFront * g"},
+        {"name": "BrakeForce", "relationship": "FrictionCoefficient * NormalBrakeForce"},
+        {"name": "BrakeTorque", "relationship": "BrakeForce * WheelRadius / 1000"},
+        {"name": "CornerForce", "relationship": "FrictionCoefficient * NormalCornerForce"},
+        {"name": "AccelerationForce", "relationship": "FrictionCoefficient * NormalAccelerationForce"},
         {"name": "UpperWishboneBrakeForce", "relationship": "BrakeForce * ((WheelRadius-b)/(a+b))"},
         {"name": "LowerWishboneBrakeForce", "relationship": "BrakeForce * ((WheelRadius+a)/(a+b))"},
         {"name": "UpperWishboneAccelerationForce", "relationship": "AccelerationForce * (b/(a+b))"},
@@ -12,29 +26,27 @@
         {"name": "UpperWishboneCorneringForce", "relationship": "CornerForce * ((WheelRadius-b)/(a+b))"},
         {"name": "LowerWishboneCorneringForce", "relationship": "-CornerForce * ((WheelRadius+a)/(a+b))"},
         {"name": "SteeringArmForce", "relationship": "BrakeForce * (p/q)"},
-        {"name": "UpperBallJointY"},
-        {"name": "LowerBallJointY"},
-        {"name": "StubAxleY"},
-        {"name": "KingPinX"},
-        {"name": "BrakeForceX"},
-        {"name": "SteeringArmX"},
         {"name": "a", "relationship": "UpperBallJointY - StubAxleY"},
         {"name": "b", "relationship": "StubAxleY - LowerBallJointY"},
         {"name": "p", "relationship": "Abs(BrakeForceX - KingPinX)"},
         {"name": "q", "relationship": "Abs(SteeringArmX - KingPinX)"},
-        {"name": "Fitness", "relationship": "1000-(Abs(UpperWishboneBrakeForce - LowerWishboneBrakeForce)+Abs(UpperWishboneCorneringForce - LowerWishboneCorneringForce)+Abs(UpperWishboneAccelerationForce - LowerWishboneAccelerationForce)+10*SteeringArmForce)"}
+        {"name": "Fitness", "relationship": "20000-(Abs(UpperWishboneBrakeForce - LowerWishboneBrakeForce)+Abs(UpperWishboneCorneringForce - LowerWishboneCorneringForce)+Abs(UpperWishboneAccelerationForce - LowerWishboneAccelerationForce)+10*SteeringArmForce)"}
     ],
     "start_conditions": {
-        "AccelerationForce": "100",
-        "BrakeForce": "100",
-        "CornerForce": "100",
-        "WheelRadius": "120",
-        "StubAxleY": "110",        
-        "KingPinX": "50",
+        "FrictionCoefficient": "1.6",
+        "AccelerationMassFront": "100.0",
+        "BrakeMassFront": "150.0",
+        "CornerMassFront": "200.0",
+        "g": "9.81",
 
-        "UpperBallJointY": "150",
-        "LowerBallJointY": "75",
-        "BrakeForceX": "45",
-        "SteeringArmX": "10"
+        "WheelRadius": "120.0",
+
+        
+        "StubAxleY": "110.0",        
+        "KingPinX": "50.0",        
+        "UpperBallJointY": "150.0",
+        "LowerBallJointY": "75.0",
+        "BrakeForceX": "45.0",
+        "SteeringArmX": "10.0"
     }
 }

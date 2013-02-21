@@ -12,6 +12,7 @@ import logging
 from sympy import S
 
 from GraphVariable import GraphVariable
+from GraphExceptions import SolverException, ConfigurationException
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -34,22 +35,32 @@ class GraphManager(object):
     _incomplete = True  # is our analysis incomplete
     _result_str = "" # A string to hold result output
 
-    def add_var(self, name, eq):
+    def __init__(self):
+        self._vars = []
+        self._graph = None
+        self._results = {}
+        self._inputs = {}
+    
+    def add_variable(self, name, eq):
         """Builds a new variable and adds it based on a given name and equation"""
-        if name in self._vars:
-            raise Error("The variable %s is already defined" % name)
-        self._vars.append(GraphVariable(name, eq))
+        if name in [x.get_name() for x in self._vars]:
+            raise ConfigurationException("The variable %s is already defined" % name)
+        v = GraphVariable(name, eq)
+        self._vars.append(v)
+        return v
 
     def set_verbose(self):
         """Sets verbose logging for the variable manager"""
         logger.setLevel(logging.DEBUG)
 
-    def resolve(self, plot=True):
+    def resolve(self, initial={}, plot=True):
         """Resolves the variables based on the given inputs and prints the result"""
-        self._build_dependency_graph(plot)
-        self._traverse_solve(self._resolve_inputs())
+        for k in initial.keys():
+            self._inputs[k] = initial[k]
+
+        self._traverse_solve(plot)
         self._generate_outputs()
-    
+
     def load_json(self, json_str):
         """Loads variable groupings from a json string"""
         logger.info("Loading data from JSON")
@@ -57,7 +68,7 @@ class GraphManager(object):
         # get the json object and check for variables
         obj = json.loads(json_str)
         if "variables" not in obj:
-            raise AttributeError("JSON has no 'vars' dictionary - cannot process")
+            raise ConfigurationException("JSON has no 'vars' dictionary - cannot process")
         
         # load in all the vars
         js_vars = obj['variables']
@@ -84,10 +95,16 @@ class GraphManager(object):
                 self._inputs[var] = S(start_conds[var])
         logger.debug(" >> Start condition load complete")
         logger.info(" >> JSON load complete")
+        self._build_dependency_graph(False)
 
     def get_output(self):
         """Returns the result output as a string"""
         return self._result_str
+
+    def get_missing_vars(self):
+        """Gets variables missing from the inputs which have no predecessors"""
+        no_predecessors = set([x['obj'].get_name() for x in self._graph.vs if x.predecessors() == []])
+        return ([x for x in no_predecessors^set(self._inputs)])
 
     def _build_dependency_graph(self, plot):
         """Builds up variable dependencies by building a network from the variables"""
@@ -108,40 +125,28 @@ class GraphManager(object):
 
         # add edges
         self._graph.add_edges(depend_edges)
-        
+                
+        # return the solving tree to the caller
+        logger.info(" >> Dependency graph complete")
+
+    def _traverse_solve(self, plot):
+    
         # write out the whole dependency graph
         if plot:
             layout = self._graph.layout("fr")
             self._graph.vs['label'] = self._graph.vs['name']
-            igraph.plot(self._graph, "dependencies_0.pdf", layout=layout)
-        
-        # return the solving tree to the caller
-        logger.info(" >> Dependency graph complete")
-
-    def _resolve_inputs(self):
-        """Determines variables with no dependencies and gets their starting value"""
-        logger.info("Finding missing inputs")
-        no_pre = [x for x in self._graph.vs if x.predecessors() == []]
-
-        # copy all pre-defined inputs across to results
-        self._results = self._inputs.copy()
-
-        # work out if any input variables are missing
-        for v in no_pre:
-            if v['name'] not in self._results:
-                self._results[v['name']] = S(raw_input("Please enter a value for %s: " % v['name']))               
-
-        logger.info(" >> missing inputs complete")
-        return no_pre
-
-    def _traverse_solve(self, initial_roots):
+            igraph.plot(self._graph, "dependencies_0.pdf", layout=layout)   
+    
         """Traverses the dependency graph, solving as it goes"""
         logger.debug("=============================")
         logger.info("       Starting solve")
         logger.debug("=============================")
         
         # Save initial conditions
-        no_pre = initial_roots
+        self._results = self._inputs.copy()
+
+        # get the nodes without predecessors to start nibbling at
+        no_pre = [x for x in self._graph.vs if x.predecessors() == []]
         
         # output initial conditions
         logger.debug("      INITIAL GIVENS:")
@@ -161,7 +166,7 @@ class GraphManager(object):
             self._graph.delete_vertices(no_pre)
             
             # write new dependency graph if required
-            if len(self._graph.vs) > 0:
+            if plot and len(self._graph.vs) > 0:
                 plot_counter += 1
                 layout = self._graph.layout("fr")
                 self._graph.vs['label'] = self._graph.vs['name']
@@ -205,3 +210,4 @@ class GraphManager(object):
 
         logger.info(" >> output generated")
         self._result_str = ret
+
