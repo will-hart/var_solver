@@ -53,8 +53,11 @@ class GraphManager(object):
         """Sets verbose logging for the variable manager"""
         logger.setLevel(logging.DEBUG)
 
-    def resolve(self, plot=True):
+    def resolve(self, initial={}, plot=True):
         """Resolves the variables based on the given inputs and prints the result"""
+        for k in initial.keys():
+            self._inputs[k] = initial[k]
+
         self._traverse_solve(plot)
         self._generate_outputs()
 
@@ -140,7 +143,7 @@ class GraphManager(object):
         logger.debug("=============================")
         
         # Save initial conditions
-        self._results = self._inputs
+        self._results = self._inputs.copy()
 
         # get the nodes without predecessors to start nibbling at
         no_pre = [x for x in self._graph.vs if x.predecessors() == []]

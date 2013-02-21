@@ -64,7 +64,7 @@ class TestGraphManager(unittest.TestCase):
         with open("test_data/basic.json", "r") as f:
             js_str = f.read()
         gm.load_json(js_str)
-        gm.resolve(False)
+        gm.resolve({}, False)
 
     def test_solver_incomplete(self):
         gm = GraphManager()
@@ -72,7 +72,9 @@ class TestGraphManager(unittest.TestCase):
         with open("test_data/basic_incomplete.json", "r") as f:
             js_str = f.read()
         gm.load_json(js_str)
-        gm.resolve(False)
+        
+        with self.assertRaises(SolverException):
+            gm.resolve({}, False)
 
 class TestGraphVariable(unittest.TestCase):
     """Run some basic unit tests on the GraphVariable class"""

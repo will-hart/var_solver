@@ -65,6 +65,10 @@ class GraphVariable(object):
         based on the relationship.  This value is saved to the dictionary
         and the dictionary is returned
         """
+        
+        if not self._relationship and not self._name in input_vars:
+            raise SolverException
+
         logger.debug("Solving %s = %s" % (self._name, 
             self._relationship if self._relationship else input_vars[self._name]))
 
