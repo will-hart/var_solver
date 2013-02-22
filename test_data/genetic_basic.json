@@ -1,0 +1,8 @@
+{
+    "variables": [
+        {"name": "a"},
+        {"name": "b"},
+        {"name": "c"},
+        {"name": "fitness", "relationship": "30 - (a + b + c)"}
+    ]
+}

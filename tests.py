@@ -1,10 +1,135 @@
-import unittest
+import random
 import sympy as sp
+import unittest
 
 from GraphManager import GraphManager
 from GraphExceptions import SolverException, ConfigurationException
 from GraphVariable import GraphVariable
+from GraphGenetics import GenomeBase
 
+
+class TestGAGenome(unittest.TestCase):
+
+    def test_initialise_default_lists_no_labels(self):
+        gb = GenomeBase()
+        self.assertEqual(gb.genome_length(), 10)
+        gl = gb.genome_list()
+        for g in gl.keys():
+            self.assertLessEqual(gl[g], 9)
+            self.assertGreaterEqual(gl[g], 0)
+
+    def test_initialise_lists_with_parameters_no_labels(self):
+        gb = GenomeBase(num=5, min=0, max=3)
+        self.assertEqual(gb.genome_length(), 5)
+        gl = gb.genome_list()
+        for g in gl.keys():
+            self.assertLessEqual(gl[g], 9)
+            self.assertGreaterEqual(gl[g], 0)
+
+    def test_initialise_default_lists_with_labels(self):
+        labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        gb = GenomeBase()
+        self.assertEqual(gb.genome_length(), 10)
+        gl = gb.genome_list()
+        for g in gl.keys():
+            self.assertIn(g, labels)
+            self.assertLessEqual(gl[g], 9)
+            self.assertGreaterEqual(gl[g], 0)
+
+    def test_initialise_lists_with_parameters_with_labels(self):
+        labels = ["a","b","c","d","e"]
+        gb = GenomeBase(num=5, min=0, max=3, labels=labels)
+        self.assertEqual(gb.genome_length(), 5)
+        gl = gb.genome_list()
+        for g in gl.keys():
+            self.assertIn(g, labels)
+            self.assertLessEqual(gl[g], 9)
+            self.assertGreaterEqual(gl[g], 0)
+
+    def test_load_parameters_from_graph_manager(self):
+        # build the GraphManager structure from file
+        json = ""
+        with open('test_data/genetic_basic.json', 'r') as f:
+            json = f.read()
+        gm = GraphManager()
+        gm.load_json(json)
+
+        # create a genome base from the graph manager use defaults
+        gb = GenomeBase(graph_manager=gm)
+
+        # get the required values
+        gl_len = gb.genome_length()
+        gl = gb.genome_list()
+        gl_keys = sorted(gl.keys())
+
+        # check our length and labels were correctly applied
+        self.assertEqual(3, gl_len)
+        self.assertEqual(['a','b','c'], gl_keys)
+
+    def test_incorrect_label_list_length_raises_configuration_exception(self):
+        labels=[1,2,3]
+        with self.assertRaises(ConfigurationException):
+            gb = GenomeBase(num=5, min=0, max=3, labels=labels)
+
+    def test_calculate_fitness_no_graph_manager(self):
+        gb = GenomeBase(num=5, min=0, max=3)
+        gl = gb.genome_list()
+        
+        # calculate fitness
+        fitness = 0
+        for g in gl.keys():
+            fitness += gl[g]
+
+        # check our fitness was correctly calculated
+        self.assertEqual(gb.fitness(), fitness)
+
+    def test_calculate_fitness(self):
+        # build the GraphManager structure from file
+        json = ""
+        with open('test_data/genetic_basic.json', 'r') as f:
+            json = f.read()
+        gm = GraphManager()
+        gm.load_json(json)
+        
+        # hand it to a genome
+        gb = GenomeBase(gm, 3, 0, 9)
+        
+        # get the genome list
+        gl = gb.genome_list()
+        
+        # calculate fitness: 30 - (a+b+c)
+        fitness = 30
+        for g in gl.keys():
+            fitness -= gl[g]
+        
+        # check fitness mathces
+        self.assertEqual(gb.fitness(), fitness)
+
+    def test_random_mutation(self):
+        gb = GenomeBase()
+        gb2 = GenomeBase(num=20)
+        self.assertEqual(gb.mutate(specific_seed=1), 1)
+        self.assertEqual(gb2.mutate(specific_seed=1), 3)
+        
+        # brute force test no specific seed - 1000 times
+        for i in range(0,1000):
+            muts = gb.mutate()
+            self.assertLessEqual(muts, 10)
+            self.assertGreaterEqual(muts, 0)
+
+    def test_crossover(self):   
+        self.assertTrue(False)
+
+    def test_copy(self):
+        gb = GenomeBase()
+        gb2 = gb.copy()
+        gl = gb.genome_list()
+        gl2 = gb2.genome_list()
+        self.assertEqual(gl, gl2)
+        
+        # change the gl2 and make sure gl doesn't change
+        gl2[random.choice(gl2.keys())] = 11
+        self.assertNotEqual(gl,gl2)
 
 class TestGraphManager(unittest.TestCase):
 

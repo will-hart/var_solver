@@ -60,6 +60,8 @@ class GraphManager(object):
 
         self._traverse_solve(plot)
         self._generate_outputs()
+        
+        return self._results
 
     def load_json(self, json_str):
         """Loads variable groupings from a json string"""

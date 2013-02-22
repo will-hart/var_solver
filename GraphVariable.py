@@ -67,7 +67,7 @@ class GraphVariable(object):
         """
         
         if not self._relationship and not self._name in input_vars:
-            raise SolverException
+            raise SolverException("Unable to find '%s' in the input variables." % self._name)
 
         logger.debug("Solving %s = %s" % (self._name, 
             self._relationship if self._relationship else input_vars[self._name]))
