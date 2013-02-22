@@ -1,7 +1,9 @@
 language: python
 python:
   - "2.7"
-# command to install dependencies
+# command to install dependencies 
+# easy_instasll igraph to prevent GCC failure on pip install
+before_install: "easy_install python-igraph"
 install: "pip install -r requirements.txt --use-mirrors"
 # command to run tests
 script: "python tests.py"

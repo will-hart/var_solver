@@ -1,2 +1,2 @@
-python-igraph==0.6
+#python-igraph==0.6
 sympy==0.7.2
