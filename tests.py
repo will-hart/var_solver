@@ -118,7 +118,20 @@ class TestGAGenome(unittest.TestCase):
             self.assertGreaterEqual(muts, 0)
 
     def test_crossover(self):   
-        self.assertTrue(False)
+        g1 = GenomeBase()
+        g2 = GenomeBase()
+        g3g4 = g1.crossover(g2)
+        
+        # check the correct type of object was returned
+        self.assertEqual(len(g3g4), 2)
+        self.assertIs(type(g3g4[0]), GenomeBase)
+        self.assertIs(type(g3g4[1]), GenomeBase)
+        
+        # Check they are new objects
+        self.assertNotEqual(g1, g3g4[0])
+        self.assertNotEqual(g2, g3g4[0])
+        self.assertNotEqual(g1, g3g4[1])
+        self.assertNotEqual(g2, g3g4[1])
 
     def test_copy(self):
         gb = GenomeBase()
