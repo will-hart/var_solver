@@ -1,6 +1,7 @@
 import random
 import warnings
 from GraphExceptions import ConfigurationException
+from GraphManager import GraphManager
 
 class GenomeBase(object):
     """
@@ -147,3 +148,53 @@ class GenomeBase(object):
 
         # return the genomes
         return [g1, g2]
+
+
+class Population(object):
+    """
+    A population of genomes 
+    """
+    
+    _objects = []
+    """
+    A placeholder for the population objects - (the genomes!)
+    """
+    
+    _graph_manager = None
+    """
+    The graph manager used to solve
+    """
+    
+    def __init__(self, graph_manager):
+        self.settings = {
+            'size': 40,
+            'iterations': 1000,
+            'permutation_chance': 0.05,
+            'crossover_chance': 0.05,
+            'fitness_var': 'fitness',
+            'global_min': 0,
+            'global_max': 10
+        }
+        
+        if not isinstance(graph_manager, GraphManager):
+            raise ConfigurationException("A Population requires a GraphManager (%s found)"% type(graph_manager))
+
+        self._graph_manager = graph_manager
+        self._objects = []
+
+    def setting(self, setting, value):
+        """
+        Updates a setting for the population manager.  
+        Settings are accesed by `population.settings('name')`
+        """
+        self.settings[setting] = value
+
+    def generate(self):
+        """Generates a population using settings from the settings object"""
+        for i in range(0, self.settings['size']):
+            g = GenomeBase(self._graph_manager, 
+                min=self.settings['global_min'], 
+                max=self.settings['global_max']
+            )
+            self._objects.append(g)
+

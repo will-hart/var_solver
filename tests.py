@@ -5,10 +5,50 @@ import unittest
 from GraphManager import GraphManager
 from GraphExceptions import SolverException, ConfigurationException
 from GraphVariable import GraphVariable
-from GraphGenetics import GenomeBase
+from GraphGenetics import GenomeBase, Population
 
 
-class TestGAGenome(unittest.TestCase):
+class TestPopulation(unittest.TestCase):
+
+    def test_population_graph_manager_is_graph_manager(self):
+        with self.assertRaises(ConfigurationException):
+            p = Population(None)
+
+    def test_population_default_settings(self):
+        gm = GraphManager()
+        p = Population(gm)
+        self.assertEqual(p.settings['size'], 40)
+        self.assertEqual(p.settings['iterations'], 1000)
+        self.assertEqual(p.settings['permutation_chance'], 0.05)
+        self.assertEqual(p.settings['crossover_chance'], 0.05)
+        self.assertEqual(p.settings['fitness_var'], 'fitness')
+
+    def test_population_update_setting(self):
+        gm = GraphManager()
+        p = Population(gm)
+        self.assertEqual(p.settings['size'], 40)
+        
+        p.setting('size', 50)
+        self.assertEqual(p.settings['size'], 50)
+
+    def test_generate_population(self):
+        json = ""
+        with open('test_data/genetic_basic.json','r') as f:
+            json = f.read()
+        gm = GraphManager()
+        gm.load_json(json)
+        p = Population(gm)
+        p.generate()
+
+        # check that a population was generated
+        self.assertEqual(len(p._objects), 40)
+        
+        # check each member is a GenomBase
+        for o in p._objects:
+            self.assertIs(type(o), GenomeBase)
+
+
+class TestGenome(unittest.TestCase):
 
     def test_initialise_default_lists_no_labels(self):
         gb = GenomeBase()
