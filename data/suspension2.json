@@ -42,10 +42,10 @@
         "WheelRadius": "120.0",
 
         
-        "StubAxleY": "110.0",        
+        "StubAxleY": "150.0",        
         "KingPinX": "50.0",        
-        "UpperBallJointY": "150.0",
-        "LowerBallJointY": "75.0",
+        "UpperBallJointY": "320.0",
+        "LowerBallJointY": "0.0",
         "BrakeForceX": "45.0",
         "SteeringArmX": "10.0"
     }

@@ -1,0 +1,25 @@
+{
+    "variables": [
+        {"name":"G"},
+        {"name":"L"},
+        {"name":"D"},
+        {"name":"d"},
+        {"name":"RockerArmLength"},
+        {"name":"SuspensionForce"},
+        {"name":"T", "relationship": "SuspensionForce * RockerArmLength"},
+        {"name":"J", "relationship":"(pi*(D**4-d**4))/32"},
+        {"name":"r", "relationship":"D/2"},
+        {"name":"theta_degrees", "relationship": "(T*L)/(G*J)"},
+        {"name":"tau_MPa", "relationship": "((r*T)/J)/1e6"},
+        {"name":"travel_mm", "relationship": "1000*RockerArmLength * theta_degrees"}
+    ],
+    "start_conditions": {
+        "SuspensionForce": "1380.0",
+        "G": "79.3e9",
+        "L": "0.50",
+        
+        "RockerArmLength": "0.15",
+        "D": "0.0285",
+        "d": "0.02526"
+    }
+}

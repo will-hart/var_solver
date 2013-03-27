@@ -10,6 +10,7 @@ from GraphManager import GraphManager
 
 def resolve_inputs(manager):
     """Determines variables with no dependencies and gets their starting value"""
+    print "resolving missing"
     missing = manager.get_missing_vars()
     missing_dict = {}
     
@@ -50,7 +51,9 @@ if args.verbose:
 
 # Solve and print output to screen
 vm.load_json(raw_json)
+print "Resolving missing inputs"
 init = resolve_inputs(vm)
+print "Done with missing inputs"
 vm.resolve(init, args.no_plot)
 
 # check if we are printing or outputting results
